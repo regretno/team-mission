@@ -18,8 +18,8 @@
     .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03); }
     .custom-check {
       appearance: none;
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       border: 2px solid #cbd5e1;
       border-radius: 8px;
       cursor: pointer;
@@ -42,142 +42,134 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen pb-16">
 
   <!-- 상단 네비게이션 & 실시간 연결 상태 -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-4 py-3 shadow-sm">
-    <div class="max-w-4xl mx-auto flex items-center justify-between">
-      <div class="flex items-center space-x-2">
-        <span class="text-2xl">⚽️</span>
-        <div>
-          <h1 class="text-lg font-black text-slate-900 tracking-tight leading-none">부자 원팀 상황판</h1>
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-3.5 py-2.5 shadow-sm">
+    <div class="max-w-4xl mx-auto flex items-center justify-between gap-2">
+      <div class="flex items-center space-x-2 min-w-0">
+        <span class="text-2xl flex-shrink-0">⚽️</span>
+        <div class="min-w-0">
+          <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none whitespace-nowrap">부자 원팀 상황판</h1>
           <div class="flex items-center space-x-1.5 mt-1">
-            <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span id="syncStatus" class="text-[11px] font-medium text-emerald-600">실시간 동기화 중</span>
+            <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
+            <span id="syncStatus" class="text-[11px] font-medium text-emerald-600 whitespace-nowrap">실시간 동기화 중</span>
           </div>
         </div>
       </div>
       <!-- 날짜 선택 및 이동 -->
-      <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl">
-        <button onclick="changeDate(-1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 transition"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-        <button onclick="goToToday()" id="dateDisplay" class="px-2 text-xs font-bold text-slate-700 hover:text-blue-600 transition">오늘</button>
-        <button onclick="changeDate(1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 transition"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+      <div class="flex items-center bg-slate-100 p-0.5 sm:p-1 rounded-xl flex-shrink-0">
+        <button onclick="changeDate(-1)" class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 transition"><i class="fa-solid fa-chevron-left text-[11px]"></i></button>
+        <button onclick="goToToday()" id="dateDisplay" class="px-1.5 sm:px-2 text-xs font-bold text-slate-700 hover:text-blue-600 transition whitespace-nowrap">오늘</button>
+        <button onclick="changeDate(1)" class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 transition"><i class="fa-solid fa-chevron-right text-[11px]"></i></button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-4xl mx-auto px-4 mt-5 space-y-5">
+  <main class="max-w-4xl mx-auto px-3.5 sm:px-4 mt-4 space-y-4">
 
     <!-- 원팀 승리 종합 게이지 카드 -->
-    <div class="bg-white rounded-3xl p-5 card-shadow border border-slate-100">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">TEAM ONE PROGRESS</div>
-          <div class="text-2xl font-black text-slate-900 flex items-center gap-2">
-            <span>오늘의 원팀 달성</span>
-            <span id="winBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold">진행 중</span>
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 card-shadow border border-slate-100">
+      <div class="flex items-start justify-between gap-2 mb-3">
+        <div class="min-w-0">
+          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 whitespace-nowrap">TEAM ONE PROGRESS</div>
+          <div class="text-lg sm:text-2xl font-black text-slate-900 flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <span class="whitespace-nowrap">오늘의 원팀 달성</span>
+            <span id="winBadge" class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold whitespace-nowrap">진행 중</span>
           </div>
         </div>
-        <div class="text-right">
-          <div class="text-xs font-bold text-slate-400">합산 달성률</div>
-          <div id="teamPercent" class="text-2xl font-black text-blue-600">0%</div>
+        <div class="text-right flex-shrink-0">
+          <div class="text-[11px] font-bold text-slate-400 whitespace-nowrap">합산 달성률</div>
+          <div id="teamPercent" class="text-xl sm:text-2xl font-black text-blue-600 leading-none mt-0.5">0%</div>
         </div>
       </div>
 
       <!-- 게이지 바 -->
-      <div class="relative w-full bg-slate-100 rounded-full h-4 overflow-hidden mb-2">
+      <div class="relative w-full bg-slate-100 rounded-full h-3.5 sm:h-4 overflow-hidden mb-2">
         <div id="teamProgressBar" class="h-full bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full transition-all duration-500" style="width: 0%"></div>
       </div>
-      <div class="flex justify-between items-center text-xs font-bold text-slate-500">
-        <span class="text-slate-400 font-medium">두 사람의 목표를 합산하여 계산됩니다.</span>
-        <span class="text-blue-600 font-semibold"><i class="fa-solid fa-trophy mr-1"></i>75% 이상 달성 시 원팀 승리!</span>
+      <div class="flex justify-between items-center text-[11px] sm:text-xs font-semibold text-slate-500 gap-1">
+        <span class="text-slate-400 truncate">둘의 목표 합산 집계</span>
+        <span class="text-blue-600 flex-shrink-0 whitespace-nowrap"><i class="fa-solid fa-trophy mr-1"></i>75% 이상 원팀 승리!</span>
       </div>
     </div>
 
-    <!-- 주간 스트릭 요약 바 -->
-    <div class="bg-white rounded-2xl p-4 card-shadow border border-slate-100 flex items-center justify-between">
-      <div class="text-xs font-bold text-slate-500 flex items-center gap-1.5">
+    <!-- 주간 스트릭 요약 바 (모바일 줄바꿈 방지) -->
+    <div class="bg-white rounded-2xl p-3.5 sm:p-4 card-shadow border border-slate-100">
+      <div class="text-xs font-bold text-slate-600 flex items-center gap-1.5 mb-2.5">
         <i class="fa-solid fa-fire text-orange-500"></i>
-        <span>이번 주 승리 기록</span>
+        <span class="whitespace-nowrap">이번 주 승리 기록</span>
       </div>
-      <div class="flex space-x-2" id="weeklyStreakContainer"></div>
+      <div class="flex space-x-1.5 sm:space-x-2 w-full justify-between" id="weeklyStreakContainer"></div>
     </div>
 
-    <!-- 2단 미션 카드 영역 (의현 & 아빠 개별 회복모드 탑재) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <!-- 2단 미션 카드 영역 (의현 & 아빠 개별 회복모드) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
       <!-- 의현 미션 카드 -->
-      <div class="bg-white rounded-3xl p-5 card-shadow border border-emerald-100/60 flex flex-col justify-between">
+      <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 card-shadow border border-emerald-100/60 flex flex-col justify-between">
         <div>
-          <!-- 상단 프로필 및 개별 회복 스위치 -->
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 gap-2">
-            <div class="flex items-center space-x-2.5">
-              <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-black text-lg flex-shrink-0">
+          <!-- 헤더: 프로필 + 회복 토글 + 추가 버튼 -->
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 gap-1">
+            <div class="flex items-center space-x-2 min-w-0">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-black text-base sm:text-lg flex-shrink-0">
                 의
               </div>
-              <div>
-                <h2 class="text-base font-black text-slate-900 leading-tight">의현 (U11)</h2>
-                <div class="text-[11px] text-emerald-600 font-bold" id="sonProgressLabel">0 / 0 완료</div>
+              <div class="min-w-0">
+                <h2 class="text-sm sm:text-base font-black text-slate-900 leading-tight whitespace-nowrap">의현 (U11)</h2>
+                <div class="text-[11px] text-emerald-600 font-bold whitespace-nowrap" id="sonProgressLabel">0 / 0 완료</div>
               </div>
             </div>
 
-            <!-- 의현 전용 회복 스위치 & 미션 추가 버튼 -->
-            <div class="flex items-center space-x-2">
-              <label class="flex items-center cursor-pointer select-none bg-amber-50/80 border border-amber-200/60 px-2.5 py-1.5 rounded-xl transition hover:bg-amber-100/60">
+            <div class="flex items-center space-x-1.5 flex-shrink-0">
+              <label class="flex items-center cursor-pointer select-none bg-amber-50/80 border border-amber-200/60 px-2 py-1 rounded-xl transition hover:bg-amber-100/60">
                 <input type="checkbox" id="sonRecoveryToggle" onchange="toggleIndividualRecovery('son')" class="sr-only peer">
-                <div class="w-7 h-4 bg-slate-200 peer-checked:bg-amber-500 rounded-full relative transition duration-200 ease-in-out mr-1.5">
-                  <div class="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full transition transform peer-checked:translate-x-3 shadow-xs"></div>
+                <div class="w-6 h-3.5 bg-slate-200 peer-checked:bg-amber-500 rounded-full relative transition duration-200 ease-in-out mr-1">
+                  <div class="absolute left-0.5 top-0.5 bg-white w-2.5 h-2.5 rounded-full transition transform peer-checked:translate-x-2.5 shadow-xs"></div>
                 </div>
-                <span class="text-[11px] font-bold text-amber-900 flex items-center gap-1">
-                  <i class="fa-solid fa-battery-half text-amber-500 text-[10px]"></i>
-                  회복
-                </span>
+                <span class="text-[11px] font-bold text-amber-900 whitespace-nowrap">회복</span>
               </label>
 
-              <button onclick="openMissionModal('son')" class="text-xs font-bold w-7 h-7 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition flex items-center justify-center">
+              <button onclick="openMissionModal('son')" class="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition flex items-center justify-center flex-shrink-0">
                 <i class="fa-solid fa-plus text-xs"></i>
               </button>
             </div>
           </div>
 
           <!-- 미션 목록 -->
-          <div id="sonMissionList" class="space-y-2.5 my-2"></div>
+          <div id="sonMissionList" class="space-y-2 my-2"></div>
         </div>
       </div>
 
       <!-- 아빠 미션 카드 -->
-      <div class="bg-white rounded-3xl p-5 card-shadow border border-blue-100/60 flex flex-col justify-between">
+      <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 card-shadow border border-blue-100/60 flex flex-col justify-between">
         <div>
-          <!-- 상단 프로필 및 개별 회복 스위치 -->
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 gap-2">
-            <div class="flex items-center space-x-2.5">
-              <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-black text-lg flex-shrink-0">
+          <!-- 헤더: 프로필 + 회복 토글 + 추가 버튼 -->
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 gap-1">
+            <div class="flex items-center space-x-2 min-w-0">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-black text-base sm:text-lg flex-shrink-0">
                 빠
               </div>
-              <div>
-                <h2 class="text-base font-black text-slate-900 leading-tight">아빠 (러닝메이트)</h2>
-                <div class="text-[11px] text-blue-600 font-bold" id="dadProgressLabel">0 / 0 완료</div>
+              <div class="min-w-0">
+                <h2 class="text-sm sm:text-base font-black text-slate-900 leading-tight whitespace-nowrap">아빠 (러닝메이트)</h2>
+                <div class="text-[11px] text-blue-600 font-bold whitespace-nowrap" id="dadProgressLabel">0 / 0 완료</div>
               </div>
             </div>
 
-            <!-- 아빠 전용 회복 스위치 & 미션 추가 버튼 -->
-            <div class="flex items-center space-x-2">
-              <label class="flex items-center cursor-pointer select-none bg-amber-50/80 border border-amber-200/60 px-2.5 py-1.5 rounded-xl transition hover:bg-amber-100/60">
+            <div class="flex items-center space-x-1.5 flex-shrink-0">
+              <label class="flex items-center cursor-pointer select-none bg-amber-50/80 border border-amber-200/60 px-2 py-1 rounded-xl transition hover:bg-amber-100/60">
                 <input type="checkbox" id="dadRecoveryToggle" onchange="toggleIndividualRecovery('dad')" class="sr-only peer">
-                <div class="w-7 h-4 bg-slate-200 peer-checked:bg-amber-500 rounded-full relative transition duration-200 ease-in-out mr-1.5">
-                  <div class="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full transition transform peer-checked:translate-x-3 shadow-xs"></div>
+                <div class="w-6 h-3.5 bg-slate-200 peer-checked:bg-amber-500 rounded-full relative transition duration-200 ease-in-out mr-1">
+                  <div class="absolute left-0.5 top-0.5 bg-white w-2.5 h-2.5 rounded-full transition transform peer-checked:translate-x-2.5 shadow-xs"></div>
                 </div>
-                <span class="text-[11px] font-bold text-amber-900 flex items-center gap-1">
-                  <i class="fa-solid fa-battery-half text-amber-500 text-[10px]"></i>
-                  회복
-                </span>
+                <span class="text-[11px] font-bold text-amber-900 whitespace-nowrap">회복</span>
               </label>
 
-              <button onclick="openMissionModal('dad')" class="text-xs font-bold w-7 h-7 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition flex items-center justify-center">
+              <button onclick="openMissionModal('dad')" class="w-7 h-7 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition flex items-center justify-center flex-shrink-0">
                 <i class="fa-solid fa-plus text-xs"></i>
               </button>
             </div>
           </div>
 
           <!-- 미션 목록 -->
-          <div id="dadMissionList" class="space-y-2.5 my-2"></div>
+          <div id="dadMissionList" class="space-y-2 my-2"></div>
         </div>
       </div>
 
@@ -186,7 +178,7 @@
 
   <!-- 미션 추가/수정 모달 -->
   <div id="missionModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 sm:p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
         <h3 id="modalTitle" class="text-base font-black text-slate-900">미션 추가</h3>
         <button onclick="closeMissionModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -216,21 +208,20 @@
 
   <script>
     // =========================================================================
-    // ⭐️ Firebase 구성 정보 (Firebase 콘솔 톱니바퀴에서 복사한 키 값으로 유지)
+    // ⭐️ Firebase 구성 정보 (콘솔에서 복사한 키를 유지해 주세요)
     // =========================================================================
     const firebaseConfig = {
-       apiKey: "AIzaSyAKKmlGxJcDRzqp7VVF6RiV0OXZi-JU1tU",
-       authDomain: "team-mission-6fdc1.firebaseapp.com",
-       projectId: "team-mission-6fdc1",
-       storageBucket: "team-mission-6fdc1.firebasestorage.app",
-       messagingSenderId: "940516468423",
-       appId: "1:940516468423:web:6f8b15c827473ff24000e2"
+ apiKey: "AIzaSyAKKmlGxJcDRzqp7VVF6RiV0OXZi-JU1tU",
+  authDomain: "team-mission-6fdc1.firebaseapp.com",
+  projectId: "team-mission-6fdc1",
+  storageBucket: "team-mission-6fdc1.firebasestorage.app",
+  messagingSenderId: "940516468423",
+  appId: "1:940516468423:web:6f8b15c827473ff24000e2"
     };
 
     let db = null;
     let isFirebaseReady = false;
 
-    // Firebase 초기화 검사
     if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
       try {
         firebase.initializeApp(firebaseConfig);
@@ -241,7 +232,6 @@
       }
     }
 
-    // 기본 초기 미션 구성
     const defaultMissions = {
       son: [
         { id: "s1", title: "스피드 줄넘기", target: "800회 달성", recovery: "300회 가볍게" },
@@ -257,12 +247,9 @@
       ]
     };
 
-    // 상태 관리
     let currentDate = new Date();
     let currentMissions = JSON.parse(JSON.stringify(defaultMissions));
-    // { 'YYYY-MM-DD': { checks: { s1: true, ... }, sonRecovery: false, dadRecovery: false } }
     let dailyRecords = {}; 
-
     let modalContext = { mode: 'create', person: 'son', missionId: null };
 
     function formatDate(d) {
@@ -273,23 +260,19 @@
       return formatDate(currentDate);
     }
 
-    // =========================================================================
-    // 실시간 동기화 (Firestore Listeners)
-    // =========================================================================
     function setupRealtimeListeners() {
       const syncDot = document.getElementById('syncDot');
       const syncStatus = document.getElementById('syncStatus');
 
       if (!isFirebaseReady) {
-        syncDot.className = "w-2 h-2 rounded-full bg-amber-500";
-        syncStatus.className = "text-[11px] font-medium text-amber-600";
-        syncStatus.textContent = "로컬 모드 (Firebase 키 설정 필요)";
+        syncDot.className = "w-2 h-2 rounded-full bg-amber-500 flex-shrink-0";
+        syncStatus.className = "text-[11px] font-medium text-amber-600 whitespace-nowrap";
+        syncStatus.textContent = "로컬 모드 (키 입력 필요)";
         loadLocalFallback();
         renderAll();
         return;
       }
 
-      // 1. 미션 목록 정의 실시간 수신
       db.collection('team_settings').doc('missions').onSnapshot((doc) => {
         if (doc.exists && doc.data().missions) {
           currentMissions = doc.data().missions;
@@ -299,14 +282,13 @@
         renderAll();
       }, (err) => console.error("미션 동기화 실패:", err));
 
-      // 2. 일일 체크 및 회복 모드 상태 실시간 수신
       db.collection('team_daily_records').onSnapshot((querySnapshot) => {
         dailyRecords = {};
         querySnapshot.forEach((doc) => {
           dailyRecords[doc.id] = doc.data();
         });
-        syncDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-        syncStatus.className = "text-[11px] font-medium text-emerald-600";
+        syncDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0";
+        syncStatus.className = "text-[11px] font-medium text-emerald-600 whitespace-nowrap";
         syncStatus.textContent = "실시간 동기화 중";
         renderAll();
       }, (err) => {
@@ -314,7 +296,6 @@
       });
     }
 
-    // 로컬 폴백
     function loadLocalFallback() {
       const savedMissions = localStorage.getItem('team_missions');
       if (savedMissions) currentMissions = JSON.parse(savedMissions);
@@ -327,9 +308,6 @@
       localStorage.setItem('team_daily_records', JSON.stringify(dailyRecords));
     }
 
-    // =========================================================================
-    // 데이터 변경 및 Firebase 쓰기
-    // =========================================================================
     async function toggleCheck(id) {
       playTinkSound();
       const dateKey = getDateKey();
@@ -341,7 +319,6 @@
       }
 
       dailyRecords[dateKey].checks[id] = !dailyRecords[dateKey].checks[id];
-
       renderAll();
 
       if (isFirebaseReady) {
@@ -353,7 +330,6 @@
       checkCelebration();
     }
 
-    // 개별 회복 모드 토글 (son 또는 dad)
     async function toggleIndividualRecovery(person) {
       const dateKey = getDateKey();
       if (!dailyRecords[dateKey]) {
@@ -385,9 +361,6 @@
       }
     }
 
-    // =========================================================================
-    // 화면 렌더링
-    // =========================================================================
     function renderAll() {
       renderDateHeader();
       renderMissions();
@@ -425,24 +398,24 @@
           const checkClass = person === 'son' ? 'son-check' : '';
 
           const item = document.createElement('div');
-          item.className = `group flex items-center justify-between p-3 rounded-2xl border transition-all ${
+          item.className = `group flex items-center justify-between p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border transition-all ${
             isChecked ? 'bg-slate-50/80 border-slate-200' : 'bg-white border-slate-100 hover:border-slate-200'
           }`;
 
           item.innerHTML = `
-            <div class="flex items-center space-x-3 flex-1 min-w-0 pr-2">
+            <div class="flex items-center space-x-2.5 flex-1 min-w-0 pr-1.5">
               <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck('${m.id}')" class="custom-check ${checkClass} flex-shrink-0">
-              <div class="truncate cursor-pointer" onclick="toggleCheck('${m.id}')">
-                <div class="text-sm font-bold ${isChecked ? 'line-through text-slate-400' : 'text-slate-800'} truncate">${m.title}</div>
-                <div class="text-xs font-semibold ${isChecked ? 'text-slate-400' : isRecovery ? 'text-amber-600 font-bold' : 'text-slate-400'} flex items-center gap-1">
-                  ${isRecovery ? '<i class="fa-solid fa-battery-half text-[10px]"></i>' : ''}
-                  ${targetText}
+              <div class="truncate cursor-pointer flex-1 min-w-0" onclick="toggleCheck('${m.id}')">
+                <div class="text-xs sm:text-sm font-bold ${isChecked ? 'line-through text-slate-400' : 'text-slate-800'} truncate">${m.title}</div>
+                <div class="text-[11px] sm:text-xs font-semibold ${isChecked ? 'text-slate-400' : isRecovery ? 'text-amber-600 font-bold' : 'text-slate-400'} flex items-center gap-1 truncate">
+                  ${isRecovery ? '<i class="fa-solid fa-battery-half text-[10px] flex-shrink-0"></i>' : ''}
+                  <span class="truncate">${targetText}</span>
                 </div>
               </div>
             </div>
-            <div class="flex items-center space-x-1 opacity-60 group-hover:opacity-100 transition">
-              <button onclick="openEditModal('${person}', '${m.id}')" class="w-7 h-7 text-slate-400 hover:text-blue-600 flex items-center justify-center rounded-lg hover:bg-slate-100"><i class="fa-solid fa-pencil text-xs"></i></button>
-              <button onclick="deleteMission('${person}', '${m.id}')" class="w-7 h-7 text-slate-400 hover:text-red-500 flex items-center justify-center rounded-lg hover:bg-slate-100"><i class="fa-solid fa-trash-can text-xs"></i></button>
+            <div class="flex items-center space-x-0.5 opacity-60 group-hover:opacity-100 transition flex-shrink-0">
+              <button onclick="openEditModal('${person}', '${m.id}')" class="w-6 h-6 sm:w-7 sm:h-7 text-slate-400 hover:text-blue-600 flex items-center justify-center rounded-lg hover:bg-slate-100"><i class="fa-solid fa-pencil text-[11px]"></i></button>
+              <button onclick="deleteMission('${person}', '${m.id}')" class="w-6 h-6 sm:w-7 sm:h-7 text-slate-400 hover:text-red-500 flex items-center justify-center rounded-lg hover:bg-slate-100"><i class="fa-solid fa-trash-can text-[11px]"></i></button>
             </div>
           `;
           listEl.appendChild(item);
@@ -473,10 +446,10 @@
 
       const badge = document.getElementById('winBadge');
       if (percent >= 75) {
-        badge.className = "text-xs px-2.5 py-1 rounded-full bg-emerald-500 text-white font-black animate-bounce";
-        badge.textContent = "⭐️ 원팀 승리 달성!";
+        badge.className = "text-[11px] px-2 py-0.5 rounded-full bg-emerald-500 text-white font-black whitespace-nowrap animate-bounce";
+        badge.textContent = "⭐️ 원팀 승리!";
       } else {
-        badge.className = "text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold";
+        badge.className = "text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold whitespace-nowrap";
         badge.textContent = `승리까지 ${Math.max(0, Math.ceil(totalCount * 0.75) - completedCount)}개 남음`;
       }
     }
@@ -506,21 +479,18 @@
 
         const isCurrentSelected = k === getDateKey();
         const el = document.createElement('div');
-        el.className = `flex flex-col items-center justify-center w-8 h-10 rounded-xl cursor-pointer transition ${
-          isCurrentSelected ? 'border-2 border-blue-500 bg-blue-50/40' : 'bg-slate-50'
+        el.className = `flex-1 flex flex-col items-center justify-center py-1.5 sm:py-2 rounded-xl cursor-pointer transition ${
+          isCurrentSelected ? 'border-2 border-blue-500 bg-blue-50/50' : 'bg-slate-50 hover:bg-slate-100'
         }`;
         el.onclick = () => { currentDate = d; renderAll(); };
         el.innerHTML = `
-          <span class="text-[10px] font-bold text-slate-400">${days[i]}</span>
+          <span class="text-[10px] font-bold text-slate-400 mb-0.5">${days[i]}</span>
           <span class="text-xs ${won ? 'text-amber-500 font-bold' : 'text-slate-300'}">${won ? '⭐️' : '•'}</span>
         `;
         container.appendChild(el);
       }
     }
 
-    // =========================================================================
-    // 모달 및 미션 편집
-    // =========================================================================
     function openMissionModal(person) {
       modalContext = { mode: 'create', person, missionId: null };
       document.getElementById('modalTitle').textContent = `${person === 'son' ? '의현이' : '아빠'} 새 미션 추가`;
