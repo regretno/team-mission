@@ -67,26 +67,17 @@
 
     <!-- 원팀 승리 종합 게이지 카드 -->
     <div class="bg-white rounded-3xl p-5 card-shadow border border-slate-100">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+      <div class="flex items-center justify-between mb-4">
         <div>
           <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">TEAM ONE PROGRESS</div>
           <div class="text-2xl font-black text-slate-900 flex items-center gap-2">
-            <span id="teamWinText">오늘의 원팀 달성</span>
+            <span>오늘의 원팀 달성</span>
             <span id="winBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold">진행 중</span>
           </div>
         </div>
-        <!-- 회복 모드 스위치 -->
-        <div class="flex items-center bg-amber-50 border border-amber-200/60 px-3.5 py-2 rounded-2xl">
-          <label class="flex items-center cursor-pointer select-none space-x-2">
-            <input type="checkbox" id="recoveryToggle" onchange="toggleRecoveryMode()" class="sr-only peer">
-            <div class="w-10 h-6 bg-slate-200 peer-checked:bg-amber-500 rounded-full relative transition duration-200 ease-in-out">
-              <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition transform peer-checked:translate-x-4 shadow-sm"></div>
-            </div>
-            <span class="text-xs font-bold text-amber-900 flex items-center gap-1">
-              <i class="fa-solid fa-battery-half text-amber-500"></i>
-              유난히 지친 날 (회복 모드)
-            </span>
-          </label>
+        <div class="text-right">
+          <div class="text-xs font-bold text-slate-400">합산 달성률</div>
+          <div id="teamPercent" class="text-2xl font-black text-blue-600">0%</div>
         </div>
       </div>
 
@@ -95,7 +86,7 @@
         <div id="teamProgressBar" class="h-full bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full transition-all duration-500" style="width: 0%"></div>
       </div>
       <div class="flex justify-between items-center text-xs font-bold text-slate-500">
-        <span>합산 달성률: <strong id="teamPercent" class="text-slate-800 text-sm">0%</strong></span>
+        <span class="text-slate-400 font-medium">두 사람의 목표를 합산하여 계산됩니다.</span>
         <span class="text-blue-600 font-semibold"><i class="fa-solid fa-trophy mr-1"></i>75% 이상 달성 시 원팀 승리!</span>
       </div>
     </div>
@@ -109,25 +100,41 @@
       <div class="flex space-x-2" id="weeklyStreakContainer"></div>
     </div>
 
-    <!-- 2단 미션 카드 영역 (의현 & 아빠) -->
+    <!-- 2단 미션 카드 영역 (의현 & 아빠 개별 회복모드 탑재) -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
       <!-- 의현 미션 카드 -->
       <div class="bg-white rounded-3xl p-5 card-shadow border border-emerald-100/60 flex flex-col justify-between">
         <div>
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-            <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-black text-lg">
+          <!-- 상단 프로필 및 개별 회복 스위치 -->
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 gap-2">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-black text-lg flex-shrink-0">
                 의
               </div>
               <div>
-                <h2 class="text-base font-black text-slate-900">의현 (U11)</h2>
+                <h2 class="text-base font-black text-slate-900 leading-tight">의현 (U11)</h2>
                 <div class="text-[11px] text-emerald-600 font-bold" id="sonProgressLabel">0 / 0 완료</div>
               </div>
             </div>
-            <button onclick="openMissionModal('son')" class="text-xs font-bold px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition flex items-center gap-1">
-              <i class="fa-solid fa-plus text-[10px]"></i> 미션 추가
-            </button>
+
+            <!-- 의현 전용 회복 스위치 & 미션 추가 버튼 -->
+            <div class="flex items-center space-x-2">
+              <label class="flex items-center cursor-pointer select-none bg-amber-50/80 border border-amber-200/60 px-2.5 py-1.5 rounded-xl transition hover:bg-amber-100/60">
+                <input type="checkbox" id="sonRecoveryToggle" onchange="toggleIndividualRecovery('son')" class="sr-only peer">
+                <div class="w-7 h-4 bg-slate-200 peer-checked:bg-amber-500 rounded-full relative transition duration-200 ease-in-out mr-1.5">
+                  <div class="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full transition transform peer-checked:translate-x-3 shadow-xs"></div>
+                </div>
+                <span class="text-[11px] font-bold text-amber-900 flex items-center gap-1">
+                  <i class="fa-solid fa-battery-half text-amber-500 text-[10px]"></i>
+                  회복
+                </span>
+              </label>
+
+              <button onclick="openMissionModal('son')" class="text-xs font-bold w-7 h-7 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition flex items-center justify-center">
+                <i class="fa-solid fa-plus text-xs"></i>
+              </button>
+            </div>
           </div>
 
           <!-- 미션 목록 -->
@@ -138,19 +145,35 @@
       <!-- 아빠 미션 카드 -->
       <div class="bg-white rounded-3xl p-5 card-shadow border border-blue-100/60 flex flex-col justify-between">
         <div>
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-            <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-black text-lg">
+          <!-- 상단 프로필 및 개별 회복 스위치 -->
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 gap-2">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-black text-lg flex-shrink-0">
                 빠
               </div>
               <div>
-                <h2 class="text-base font-black text-slate-900">아빠 (러닝메이트)</h2>
+                <h2 class="text-base font-black text-slate-900 leading-tight">아빠 (러닝메이트)</h2>
                 <div class="text-[11px] text-blue-600 font-bold" id="dadProgressLabel">0 / 0 완료</div>
               </div>
             </div>
-            <button onclick="openMissionModal('dad')" class="text-xs font-bold px-2.5 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition flex items-center gap-1">
-              <i class="fa-solid fa-plus text-[10px]"></i> 미션 추가
-            </button>
+
+            <!-- 아빠 전용 회복 스위치 & 미션 추가 버튼 -->
+            <div class="flex items-center space-x-2">
+              <label class="flex items-center cursor-pointer select-none bg-amber-50/80 border border-amber-200/60 px-2.5 py-1.5 rounded-xl transition hover:bg-amber-100/60">
+                <input type="checkbox" id="dadRecoveryToggle" onchange="toggleIndividualRecovery('dad')" class="sr-only peer">
+                <div class="w-7 h-4 bg-slate-200 peer-checked:bg-amber-500 rounded-full relative transition duration-200 ease-in-out mr-1.5">
+                  <div class="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full transition transform peer-checked:translate-x-3 shadow-xs"></div>
+                </div>
+                <span class="text-[11px] font-bold text-amber-900 flex items-center gap-1">
+                  <i class="fa-solid fa-battery-half text-amber-500 text-[10px]"></i>
+                  회복
+                </span>
+              </label>
+
+              <button onclick="openMissionModal('dad')" class="text-xs font-bold w-7 h-7 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition flex items-center justify-center">
+                <i class="fa-solid fa-plus text-xs"></i>
+              </button>
+            </div>
           </div>
 
           <!-- 미션 목록 -->
@@ -193,7 +216,7 @@
 
   <script>
     // =========================================================================
-    // ⭐️ Firebase 구성 정보 (Firebase 콘솔 톱니바퀴에서 복사한 키 값으로 변경하세요)
+    // ⭐️ Firebase 구성 정보 (Firebase 콘솔 톱니바퀴에서 복사한 키 값으로 유지)
     // =========================================================================
     const firebaseConfig = {
        apiKey: "AIzaSyAKKmlGxJcDRzqp7VVF6RiV0OXZi-JU1tU",
@@ -237,7 +260,8 @@
     // 상태 관리
     let currentDate = new Date();
     let currentMissions = JSON.parse(JSON.stringify(defaultMissions));
-    let dailyRecords = {}; // { 'YYYY-MM-DD': { checks: { s1: true, ... }, isRecovery: false } }
+    // { 'YYYY-MM-DD': { checks: { s1: true, ... }, sonRecovery: false, dadRecovery: false } }
+    let dailyRecords = {}; 
 
     let modalContext = { mode: 'create', person: 'son', missionId: null };
 
@@ -259,7 +283,7 @@
       if (!isFirebaseReady) {
         syncDot.className = "w-2 h-2 rounded-full bg-amber-500";
         syncStatus.className = "text-[11px] font-medium text-amber-600";
-        syncStatus.textContent = "로컬 모드 (Firebase 키 입력 필요)";
+        syncStatus.textContent = "로컬 모드 (Firebase 키 설정 필요)";
         loadLocalFallback();
         renderAll();
         return;
@@ -275,7 +299,7 @@
         renderAll();
       }, (err) => console.error("미션 동기화 실패:", err));
 
-      // 2. 전체 일일 체크 기록 실시간 수신
+      // 2. 일일 체크 및 회복 모드 상태 실시간 수신
       db.collection('team_daily_records').onSnapshot((querySnapshot) => {
         dailyRecords = {};
         querySnapshot.forEach((doc) => {
@@ -290,7 +314,7 @@
       });
     }
 
-    // 로컬 폴백 (Firebase 설정 전에도 사용 가능)
+    // 로컬 폴백
     function loadLocalFallback() {
       const savedMissions = localStorage.getItem('team_missions');
       if (savedMissions) currentMissions = JSON.parse(savedMissions);
@@ -310,7 +334,7 @@
       playTinkSound();
       const dateKey = getDateKey();
       if (!dailyRecords[dateKey]) {
-        dailyRecords[dateKey] = { checks: {}, isRecovery: false };
+        dailyRecords[dateKey] = { checks: {}, sonRecovery: false, dadRecovery: false };
       }
       if (!dailyRecords[dateKey].checks) {
         dailyRecords[dateKey].checks = {};
@@ -318,7 +342,6 @@
 
       dailyRecords[dateKey].checks[id] = !dailyRecords[dateKey].checks[id];
 
-      // 로컬 즉시 반영
       renderAll();
 
       if (isFirebaseReady) {
@@ -330,12 +353,19 @@
       checkCelebration();
     }
 
-    async function toggleRecoveryMode() {
+    // 개별 회복 모드 토글 (son 또는 dad)
+    async function toggleIndividualRecovery(person) {
       const dateKey = getDateKey();
-      if (!dailyRecords[dateKey]) dailyRecords[dateKey] = { checks: {}, isRecovery: false };
+      if (!dailyRecords[dateKey]) {
+        dailyRecords[dateKey] = { checks: {}, sonRecovery: false, dadRecovery: false };
+      }
       
-      const toggle = document.getElementById('recoveryToggle');
-      dailyRecords[dateKey].isRecovery = toggle.checked;
+      const isChecked = document.getElementById(`${person}RecoveryToggle`).checked;
+      if (person === 'son') {
+        dailyRecords[dateKey].sonRecovery = isChecked;
+      } else {
+        dailyRecords[dateKey].dadRecovery = isChecked;
+      }
 
       renderAll();
 
@@ -373,20 +403,21 @@
       document.getElementById('dateDisplay').textContent = label;
 
       const dateKey = getDateKey();
-      const isRecovery = dailyRecords[dateKey]?.isRecovery || false;
-      document.getElementById('recoveryToggle').checked = isRecovery;
+      const currentDay = dailyRecords[dateKey] || {};
+      document.getElementById('sonRecoveryToggle').checked = !!currentDay.sonRecovery;
+      document.getElementById('dadRecoveryToggle').checked = !!currentDay.dadRecovery;
     }
 
     function renderMissions() {
       const dateKey = getDateKey();
-      const currentDay = dailyRecords[dateKey] || { checks: {}, isRecovery: false };
+      const currentDay = dailyRecords[dateKey] || { checks: {} };
       const checks = currentDay.checks || {};
-      const isRecovery = currentDay.isRecovery;
 
       ['son', 'dad'].forEach(person => {
         const listEl = document.getElementById(`${person}MissionList`);
         listEl.innerHTML = '';
         const missions = currentMissions[person] || [];
+        const isRecovery = person === 'son' ? !!currentDay.sonRecovery : !!currentDay.dadRecovery;
 
         missions.forEach(m => {
           const isChecked = !!checks[m.id];
@@ -457,7 +488,7 @@
 
       const temp = new Date(currentDate);
       const day = temp.getDay();
-      const diff = temp.getDate() - day + (day === 0 ? -6 : 1); // 월요일 기준
+      const diff = temp.getDate() - day + (day === 0 ? -6 : 1);
       const monday = new Date(temp.setDate(diff));
 
       for (let i = 0; i < 7; i++) {
@@ -488,7 +519,7 @@
     }
 
     // =========================================================================
-    // 미션 추가 및 모달 로직
+    // 모달 및 미션 편집
     // =========================================================================
     function openMissionModal(person) {
       modalContext = { mode: 'create', person, missionId: null };
@@ -542,7 +573,6 @@
       await updateMissionsInCloud();
     }
 
-    // 날짜 네비게이션
     function changeDate(days) {
       currentDate.setDate(currentDate.getDate() + days);
       renderAll();
@@ -552,7 +582,6 @@
       renderAll();
     }
 
-    // 효과음 및 축하 콘페티
     let audioCtx = null;
     function playTinkSound() {
       try {
@@ -581,7 +610,6 @@
       }
     }
 
-    // 초기 실행
     window.onload = () => {
       setupRealtimeListeners();
     };
