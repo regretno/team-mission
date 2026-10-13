@@ -3,902 +3,588 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>부자 원팀(One-Team) 데일리 미션 상황판</title>
-  
-  <!-- Tailwind CSS -->
+  <title>부자 원팀 데일리 미션 상황판</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              navy: '#0b1329',
-              dark: '#131e3a',
-              card: '#1a274a',
-              accentGreen: '#10b981',
-              accentGold: '#f59e0b',
-              accentBlue: '#3b82f6',
-              border: '#2a3b66'
-            }
-          },
-          fontFamily: {
-            sans: ['Pretendard', 'Inter', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Firebase SDK (v9 Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <style>
-    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-    body {
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-      touch-action: manipulation;
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&display=swap');
+    body { font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
+    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03); }
+    .custom-check {
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    .custom-check:checked {
+      background-color: #3b82f6;
+      border-color: #3b82f6;
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
     }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 9999px;
-    }
-    /* Bounce on check */
-    @keyframes checkBounce {
-      0% { transform: scale(0.9); }
-      50% { transform: scale(1.15); }
-      100% { transform: scale(1); }
-    }
-    .animate-check {
-      animation: checkBounce 0.28s ease-out;
+    .custom-check.son-check:checked {
+      background-color: #10b981;
+      border-color: #10b981;
     }
   </style>
 </head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-16">
 
-<body class="bg-[#0b1329] text-slate-100 min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white pb-12">
-  <!-- Top App Navigation -->
-  <header class="sticky top-0 z-40 bg-[#0e1732]/95 backdrop-blur border-b border-brand-border px-4 py-3 shadow-md">
-    <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+  <!-- 상단 네비게이션 & 실시간 연결 상태 -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-4 py-3 shadow-sm">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-2">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-amber-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-          <i class="fa-solid fa-trophy text-slate-900 text-lg"></i>
-        </div>
+        <span class="text-2xl">⚽️</span>
         <div>
-          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
-            원팀(One-Team) 상황판
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">U11 x 뱅커</span>
-          </h1>
-          <p class="text-[11px] text-slate-400 hidden sm:block">의현이와 아빠의 매일 성장 프로젝트</p>
+          <h1 class="text-lg font-black text-slate-900 tracking-tight leading-none">부자 원팀 상황판</h1>
+          <div class="flex items-center space-x-1.5 mt-1">
+            <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="syncStatus" class="text-[11px] font-medium text-emerald-600">실시간 동기화 중</span>
+          </div>
         </div>
       </div>
-
-      <!-- Date Navigator -->
-      <div class="flex items-center bg-[#152347] border border-brand-border rounded-xl p-1 shadow-inner">
-        <button id="prevDateBtn" class="p-2 hover:bg-white/10 rounded-lg text-slate-300 hover:text-white transition" title="어제">
-          <i class="fa-solid fa-chevron-left text-sm"></i>
-        </button>
-        <div class="px-3 flex items-center gap-1 cursor-pointer" id="datePickerTrigger">
-          <i class="fa-regular fa-calendar text-emerald-400 text-xs"></i>
-          <span id="currentDateDisplay" class="font-semibold text-xs sm:text-sm text-slate-100 min-w-[90px] text-center">오늘</span>
-        </div>
-        <button id="nextDateBtn" class="p-2 hover:bg-white/10 rounded-lg text-slate-300 hover:text-white transition" title="내일">
-          <i class="fa-solid fa-chevron-right text-sm"></i>
-        </button>
-        <button id="todayBtn" class="ml-1 px-2.5 py-1 text-xs bg-emerald-500 text-slate-950 font-bold rounded-lg hover:bg-emerald-400 transition shadow">
-          오늘
-        </button>
+      <!-- 날짜 선택 및 이동 -->
+      <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl">
+        <button onclick="changeDate(-1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 transition"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+        <button onclick="goToToday()" id="dateDisplay" class="px-2 text-xs font-bold text-slate-700 hover:text-blue-600 transition">오늘</button>
+        <button onclick="changeDate(1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 transition"><i class="fa-solid fa-chevron-right text-xs"></i></button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto w-full px-4 pt-5 flex-1 flex flex-col gap-6">
-    <!-- Today Team Summary Banner -->
-    <section class="bg-gradient-to-r from-[#172554] via-[#1e293b] to-[#134e4a] border border-slate-700/60 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden">
-      <div class="absolute -right-6 -bottom-6 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
-      
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+  <main class="max-w-4xl mx-auto px-4 mt-5 space-y-5">
+
+    <!-- 원팀 승리 종합 게이지 카드 -->
+    <div class="bg-white rounded-3xl p-5 card-shadow border border-slate-100">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <div class="flex items-center gap-2 mb-1">
-            <span id="victoryBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-600">
-              <i class="fa-solid fa-hourglass-half text-amber-400"></i>
-              <span>목표 진행 중</span>
+          <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">TEAM ONE PROGRESS</div>
+          <div class="text-2xl font-black text-slate-900 flex items-center gap-2">
+            <span id="teamWinText">오늘의 원팀 달성</span>
+            <span id="winBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold">진행 중</span>
+          </div>
+        </div>
+        <!-- 회복 모드 스위치 -->
+        <div class="flex items-center bg-amber-50 border border-amber-200/60 px-3.5 py-2 rounded-2xl">
+          <label class="flex items-center cursor-pointer select-none space-x-2">
+            <input type="checkbox" id="recoveryToggle" onchange="toggleRecoveryMode()" class="sr-only peer">
+            <div class="w-10 h-6 bg-slate-200 peer-checked:bg-amber-500 rounded-full relative transition duration-200 ease-in-out">
+              <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition transform peer-checked:translate-x-4 shadow-sm"></div>
+            </div>
+            <span class="text-xs font-bold text-amber-900 flex items-center gap-1">
+              <i class="fa-solid fa-battery-half text-amber-500"></i>
+              유난히 지친 날 (회복 모드)
             </span>
-            <span class="text-xs text-slate-400" id="teamScoreDetail">완료 0 / 8 미션</span>
-          </div>
-          <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
-            <span id="bannerTitle">오늘도 원팀으로 승리하자! 🔥</span>
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-300 mt-1" id="bannerSub">
-            부자 합산 75% 이상 달성 시 당일 골든 스타(⭐️) 획득!
-          </p>
-        </div>
-
-        <!-- Gauge Progress Card -->
-        <div class="bg-slate-900/60 backdrop-blur border border-white/10 rounded-xl p-3 sm:p-4 flex items-center gap-4 min-w-[260px]">
-          <div class="relative w-16 h-16 flex items-center justify-center">
-            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-              <path class="text-slate-800" stroke-width="3.5" stroke="currentColor" fill="none"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path id="circleProgress" class="text-emerald-400 transition-all duration-700 ease-out" stroke-dasharray="0, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            </svg>
-            <span id="circlePercentText" class="absolute text-sm font-black text-white">0%</span>
-          </div>
-          <div class="flex-1 text-xs">
-            <div class="flex justify-between text-slate-300 font-medium mb-1">
-              <span>팀 목표 진행률</span>
-              <span id="teamTargetText" class="text-emerald-400 font-bold">목표 75%</span>
-            </div>
-            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-              <div id="teamProgressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-300 transition-all duration-500 rounded-full" style="width: 0%"></div>
-            </div>
-            <p class="text-[10px] text-slate-400 mt-1.5" id="streakNotice">🔥 최근 0일 연속 승리 중!</p>
-          </div>
+          </label>
         </div>
       </div>
 
-      <!-- Weekly Mini Matrix -->
-      <div class="mt-4 pt-3 border-t border-white/10">
-        <div class="text-[11px] text-slate-400 mb-2 font-medium flex items-center justify-between">
-          <span><i class="fa-solid fa-calendar-week mr-1 text-amber-400"></i>이번 주 원팀 승리 트래커 (월~일)</span>
-          <span class="text-emerald-400" id="weeklyWinCount">0/7일 승리</span>
-        </div>
-        <div class="grid grid-cols-7 gap-1.5 sm:gap-2" id="weeklyTrackerGrid">
-          <!-- Populated by JS -->
-        </div>
+      <!-- 게이지 바 -->
+      <div class="relative w-full bg-slate-100 rounded-full h-4 overflow-hidden mb-2">
+        <div id="teamProgressBar" class="h-full bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full transition-all duration-500" style="width: 0%"></div>
       </div>
-    </section>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-
-      <!-- ================= UI-HYUN CARD (SON) ================= -->
-      <section class="bg-[#121c38] border border-brand-border rounded-2xl shadow-xl flex flex-col overflow-hidden transition-all duration-300 hover:border-emerald-500/40">
-        <!-- Player Header -->
-        <div class="bg-gradient-to-r from-emerald-950/60 to-slate-900 border-b border-brand-border p-4 flex items-center justify-between">
-          <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl font-bold shadow-inner">
-              ⚽
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <h3 class="text-lg font-extrabold text-white">의현 (No.1)</h3>
-                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500 text-slate-950">U11 선수반</span>
-              </div>
-              <p class="text-xs text-slate-400">기본기 & 민첩성 & 탄탄한 피지컬</p>
-            </div>
-          </div>
-          <div class="text-right">
-            <span id="sonProgressLabel" class="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-lg border border-emerald-700/50">0 / 4 완료</span>
-            <div class="w-24 bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
-              <div id="sonBar" class="bg-emerald-400 h-full transition-all duration-300 rounded-full" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mission Checklist -->
-        <div class="p-4 sm:p-5 flex-1 flex flex-col gap-3" id="sonMissionsContainer">
-          <!-- Injected dynamically -->
-        </div>
-
-        <!-- Add Mission Button / Modal Trigger -->
-        <div class="px-4 pb-2">
-          <button onclick="openAddMissionModal('son')" class="w-full py-2 px-3 border border-dashed border-slate-700 hover:border-emerald-500 rounded-xl text-xs font-medium text-slate-400 hover:text-emerald-300 flex items-center justify-center gap-1.5 transition">
-            <i class="fa-solid fa-plus text-xs"></i> 의현이 미션 추가하기
-          </button>
-        </div>
-
-        <!-- Feedback & Daily Comment -->
-        <div class="p-4 bg-slate-900/60 border-t border-brand-border/60">
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
-            <span><i class="fa-regular fa-comment-dots text-emerald-400 mr-1"></i>의현이의 오늘 한줄 (훈련 소감)</span>
-            <span id="sonCommentStatus" class="text-[10px] text-slate-500">자동 저장됨</span>
-          </label>
-          <div class="flex gap-2">
-            <input type="text" id="sonCommentInput" placeholder="오늘 볼터치 감각은 어땠어? 한마디 적어보자!" 
-              class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
-            <button onclick="saveComments()" class="px-3 py-2 bg-emerald-600/30 text-emerald-300 hover:bg-emerald-600/50 rounded-xl text-xs font-semibold transition border border-emerald-500/30">
-              저장
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= DAD CARD (FATHER) ================= -->
-      <section class="bg-[#121c38] border border-brand-border rounded-2xl shadow-xl flex flex-col overflow-hidden transition-all duration-300 hover:border-blue-500/40">
-        <!-- Player Header -->
-        <div class="bg-gradient-to-r from-blue-950/60 to-slate-900 border-b border-brand-border p-4 flex items-center justify-between">
-          <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 text-xl font-bold shadow-inner">
-              💼
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <h3 class="text-lg font-extrabold text-white">아빠 (러닝메이트)</h3>
-                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-blue-500 text-slate-950">원팀 캡틴</span>
-              </div>
-              <p class="text-xs text-slate-400">금융 전문가의 체력 & 영어 성장 루틴</p>
-            </div>
-          </div>
-          <div class="text-right">
-            <span id="dadProgressLabel" class="text-xs font-bold text-blue-400 bg-blue-950/80 px-2.5 py-1 rounded-lg border border-blue-700/50">0 / 4 완료</span>
-            <div class="w-24 bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
-              <div id="dadBar" class="bg-blue-400 h-full transition-all duration-300 rounded-full" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mission Checklist -->
-        <div class="p-4 sm:p-5 flex-1 flex flex-col gap-3" id="dadMissionsContainer">
-          <!-- Injected dynamically -->
-        </div>
-
-        <!-- Add Mission Button / Modal Trigger -->
-        <div class="px-4 pb-2">
-          <button onclick="openAddMissionModal('dad')" class="w-full py-2 px-3 border border-dashed border-slate-700 hover:border-blue-500 rounded-xl text-xs font-medium text-slate-400 hover:text-blue-300 flex items-center justify-center gap-1.5 transition">
-            <i class="fa-solid fa-plus text-xs"></i> 아빠 미션 추가하기
-          </button>
-        </div>
-
-        <!-- Feedback & Daily Comment -->
-        <div class="p-4 bg-slate-900/60 border-t border-brand-border/60">
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
-            <span><i class="fa-solid fa-heart text-amber-400 mr-1"></i>아빠의 오늘 칭찬 & 메모</span>
-            <span id="dadCommentStatus" class="text-[10px] text-slate-500">자동 저장됨</span>
-          </label>
-          <div class="flex gap-2">
-            <input type="text" id="dadCommentInput" placeholder="의현이에게 해줄 칭찬 한마디 or 오늘 러닝 기록" 
-              class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
-            <button onclick="saveComments()" class="px-3 py-2 bg-blue-600/30 text-blue-300 hover:bg-blue-600/50 rounded-xl text-xs font-semibold transition border border-blue-500/30">
-              저장
-            </button>
-          </div>
-        </div>
-      </section>
+      <div class="flex justify-between items-center text-xs font-bold text-slate-500">
+        <span>합산 달성률: <strong id="teamPercent" class="text-slate-800 text-sm">0%</strong></span>
+        <span class="text-blue-600 font-semibold"><i class="fa-solid fa-trophy mr-1"></i>75% 이상 달성 시 원팀 승리!</span>
+      </div>
     </div>
 
-    <!-- Team Rules & Motivation Footer Widget -->
-    <section class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg flex-shrink-0">
-          <i class="fa-solid fa-handshake"></i>
-        </div>
-        <div class="text-xs">
-          <p class="font-bold text-slate-200">원팀 약속: 서로 채점해주기 (Peer Review)</p>
-          <p class="text-slate-400 mt-0.5">매일 잠들기 전 5분, 아빠와 의현이가 상대방의 미션을 점검해주고 칭찬 하이파이브를 나눕니다.</p>
+    <!-- 주간 스트릭 요약 바 -->
+    <div class="bg-white rounded-2xl p-4 card-shadow border border-slate-100 flex items-center justify-between">
+      <div class="text-xs font-bold text-slate-500 flex items-center gap-1.5">
+        <i class="fa-solid fa-fire text-orange-500"></i>
+        <span>이번 주 승리 기록</span>
+      </div>
+      <div class="flex space-x-2" id="weeklyStreakContainer"></div>
+    </div>
+
+    <!-- 2단 미션 카드 영역 (의현 & 아빠) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+      <!-- 의현 미션 카드 -->
+      <div class="bg-white rounded-3xl p-5 card-shadow border border-emerald-100/60 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-black text-lg">
+                의
+              </div>
+              <div>
+                <h2 class="text-base font-black text-slate-900">의현 (U11)</h2>
+                <div class="text-[11px] text-emerald-600 font-bold" id="sonProgressLabel">0 / 0 완료</div>
+              </div>
+            </div>
+            <button onclick="openMissionModal('son')" class="text-xs font-bold px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition flex items-center gap-1">
+              <i class="fa-solid fa-plus text-[10px]"></i> 미션 추가
+            </button>
+          </div>
+
+          <!-- 미션 목록 -->
+          <div id="sonMissionList" class="space-y-2.5 my-2"></div>
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <button onclick="resetTodayData()" class="px-3 py-1.5 rounded-lg border border-slate-700 text-[11px] text-slate-400 hover:text-rose-400 hover:border-rose-900 transition">
-          <i class="fa-solid fa-rotate-left mr-1"></i>오늘 초기화
-        </button>
-        <button onclick="exportWeeklyReport()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 text-[11px] font-medium transition border border-slate-600">
-          <i class="fa-solid fa-share-nodes mr-1"></i>상황판 요약 복사
-        </button>
+
+      <!-- 아빠 미션 카드 -->
+      <div class="bg-white rounded-3xl p-5 card-shadow border border-blue-100/60 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-black text-lg">
+                빠
+              </div>
+              <div>
+                <h2 class="text-base font-black text-slate-900">아빠 (러닝메이트)</h2>
+                <div class="text-[11px] text-blue-600 font-bold" id="dadProgressLabel">0 / 0 완료</div>
+              </div>
+            </div>
+            <button onclick="openMissionModal('dad')" class="text-xs font-bold px-2.5 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition flex items-center gap-1">
+              <i class="fa-solid fa-plus text-[10px]"></i> 미션 추가
+            </button>
+          </div>
+
+          <!-- 미션 목록 -->
+          <div id="dadMissionList" class="space-y-2.5 my-2"></div>
+        </div>
       </div>
-    </section>
+
+    </div>
   </main>
 
-  <!-- Add Custom Mission Modal -->
-  <div id="addMissionModal" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
-    <div class="bg-[#152347] border border-brand-border rounded-2xl max-w-sm w-full p-5 shadow-2xl">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="font-bold text-white text-base flex items-center gap-2">
-          <i class="fa-solid fa-list-check text-emerald-400"></i>
-          <span id="modalTargetTitle">새 미션 추가</span>
-        </h3>
-        <button onclick="closeAddMissionModal()" class="text-slate-400 hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+  <!-- 미션 추가/수정 모달 -->
+  <div id="missionModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 id="modalTitle" class="text-base font-black text-slate-900">미션 추가</h3>
+        <button onclick="closeMissionModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      
-      <div class="space-y-3 text-xs">
+
+      <div class="space-y-3">
         <div>
-          <label class="block text-slate-300 font-medium mb-1">미션 이름</label>
-          <input type="text" id="newMissionTitle" placeholder="예: 양발 리프팅 300회 / 영단어 10개" 
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          <label class="block text-xs font-bold text-slate-500 mb-1">미션 이름</label>
+          <input type="text" id="modalMissionTitle" placeholder="예: 양발 리프팅 300개" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
         </div>
         <div>
-          <label class="block text-slate-300 font-medium mb-1">상세 기준 / 목표량</label>
-          <input type="text" id="newMissionDetail" placeholder="예: 15분간 집중 / 좌우 밸런스 유지" 
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          <label class="block text-xs font-bold text-slate-500 mb-1">일반 목표 기준</label>
+          <input type="text" id="modalMissionTarget" placeholder="예: 20분 집중 훈련" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <div>
-          <label class="block text-slate-300 font-medium mb-1">카테고리 아이콘</label>
-          <select id="newMissionIcon" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
-            <option value="fa-solid fa-futbol">⚽ 축구 / 경기</option>
-            <option value="fa-solid fa-person-running">🏃 러닝 / 전신</option>
-            <option value="fa-solid fa-dumbbell">💪 피지컬 / 근력</option>
-            <option value="fa-solid fa-stopwatch">⏱️ 줄넘기 / 스피드</option>
-            <option value="fa-solid fa-book-open">📚 공부 / 영어</option>
-            <option value="fa-solid fa-heart-pulse">🧘 스트레칭 / 회복</option>
-            <option value="fa-solid fa-pen-fancy">✍️ 일기 / 기록</option>
-          </select>
+          <label class="block text-xs font-bold text-amber-600 mb-1">지친 날 (회복 모드) 기준</label>
+          <input type="text" id="modalMissionRecovery" placeholder="예: 10분 가볍게" class="w-full px-3.5 py-2.5 rounded-xl border border-amber-200 bg-amber-50/40 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
         </div>
       </div>
 
-      <div class="flex gap-2 mt-5">
-        <button onclick="closeAddMissionModal()" class="flex-1 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold hover:bg-slate-700 transition">
-          취소
-        </button>
-        <button onclick="confirmAddMission()" class="flex-1 py-2 bg-emerald-500 text-slate-950 rounded-xl text-xs font-bold hover:bg-emerald-400 transition">
-          등록하기
-        </button>
+      <div class="flex space-x-2 pt-2">
+        <button onclick="closeMissionModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs hover:bg-slate-200 transition">취소</button>
+        <button onclick="saveMission()" class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition">저장하기</button>
       </div>
     </div>
-  </div>
-
-  <!-- Toast Message Box -->
-  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/95 border border-emerald-500/60 text-white px-4 py-2.5 rounded-full shadow-2xl text-xs flex items-center gap-2 pointer-events-none transition-all duration-300 opacity-0 translate-y-3 z-50">
-    <i class="fa-solid fa-circle-check text-emerald-400"></i>
-    <span id="toastMessage">알림 메시지</span>
   </div>
 
   <script>
-    /* Default initial missions */
-    const DEFAULT_SON_MISSIONS = [
-      { id: 'son_1', title: '스피드 줄넘기', detail: '2단 뛰기 또는 1,000회 완수', icon: 'fa-solid fa-stopwatch' },
-      { id: 'son_2', title: '코어 플랭크', detail: '정면 & 사이드 1분 30초 x 3세트', icon: 'fa-solid fa-dumbbell' },
-      { id: 'son_3', title: '콘 드리블 & 볼터치', detail: '양발 인사이드/아웃사이드 20분', icon: 'fa-solid fa-futbol' },
-      { id: 'son_4', title: '하체 폼롤러 및 스트레칭', detail: '종아리·허벅지 근육 이완 10분', icon: 'fa-solid fa-heart-pulse' }
-    ];
+    // =========================================================================
+    // ⭐️ Firebase 구성 정보 (Firebase 콘솔 톱니바퀴에서 복사한 키 값으로 변경하세요)
+    // =========================================================================
+    const firebaseConfig = {
+       apiKey: "AIzaSyAKKmlGxJcDRzqp7VVF6RiV0OXZi-JU1tU",
+       authDomain: "team-mission-6fdc1.firebaseapp.com",
+       projectId: "team-mission-6fdc1",
+       storageBucket: "team-mission-6fdc1.firebasestorage.app",
+       messagingSenderId: "940516468423",
+       appId: "1:940516468423:web:6f8b15c827473ff24000e2"
+    };
 
-    const DEFAULT_DAD_MISSIONS = [
-      { id: 'dad_1', title: '비즈니스 & 경제 영어 리스닝', detail: '글로벌 경제 뉴스/팟캐스트 20분', icon: 'fa-solid fa-book-open' },
-      { id: 'dad_2', title: '전신 모빌리티 & 스트레칭', detail: '골반·고관절 가동성 운동 15분', icon: 'fa-solid fa-heart-pulse' },
-      { id: 'dad_3', title: '이지 러닝 / 조깅', detail: '퇴근 후 가벼운 심폐 지구력 35분', icon: 'fa-solid fa-person-running' },
-      { id: 'dad_4', title: '금융 시황 & 루틴 메모', detail: '하루 경제 이슈 및 훈련 1줄 요약', icon: 'fa-solid fa-pen-fancy' }
-    ];
+    let db = null;
+    let isFirebaseReady = false;
 
-    /* Web Audio Sound Synthesizer (No external audio files needed) */
-    class AudioEffects {
-      constructor() {
-        this.ctx = null;
-      }
-      init() {
-        if (!this.ctx) {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (AudioContext) this.ctx = new AudioContext();
-        }
-      }
-      playCheck() {
-        try {
-          this.init();
-          if (!this.ctx) return;
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
-          osc.frequency.exponentialRampToValueAtTime(783.99, this.ctx.currentTime + 0.12); // G5
-          gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start();
-          osc.stop(this.ctx.currentTime + 0.15);
-        } catch (e) {
-          // Silent fallback
-        }
-      }
-      playWin() {
-        try {
-          this.init();
-          if (!this.ctx) return;
-          const now = this.ctx.currentTime;
-          const notes = [523.25, 659.25, 783.99, 1046.50]; // C, E, G, High C
-          notes.forEach((freq, idx) => {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-            gain.gain.setValueAtTime(0.15, now + idx * 0.08);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start(now + idx * 0.08);
-            osc.stop(now + idx * 0.08 + 0.25);
-          });
-        } catch (e) {}
+    // Firebase 초기화 검사
+    if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+      try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        isFirebaseReady = true;
+      } catch (err) {
+        console.warn("Firebase 초기화 에러, 로컬 저장소 모드로 작동합니다:", err);
       }
     }
 
-    const sound = new AudioEffects();
+    // 기본 초기 미션 구성
+    const defaultMissions = {
+      son: [
+        { id: "s1", title: "스피드 줄넘기", target: "800회 달성", recovery: "300회 가볍게" },
+        { id: "s2", title: "코어 플랭크", target: "1분 30초 x 3세트", recovery: "1분 1회 유지" },
+        { id: "s3", title: "콘 드리블 & 볼터치", target: "20분 집중 훈련", recovery: "10분 양발 터치" },
+        { id: "s4", title: "하체 폼롤러 스트레칭", target: "10분 전신 이완", recovery: "5분 이완" }
+      ],
+      dad: [
+        { id: "d1", title: "영어 뉴스 리스닝", target: "20분 청취 (출퇴근/자투리)", recovery: "10분 가볍게" },
+        { id: "d2", title: "모빌리티 스트레칭", target: "15분 전신 스트레칭", recovery: "7분 관절 풀기" },
+        { id: "d3", title: "이지 & 슬로우 러닝", target: "30분 ~ 5km 러닝", recovery: "15분 산책/조깅" },
+        { id: "d4", title: "하루 한 줄 피드백", target: "오늘의 이슈/러닝 기록 1줄", recovery: "단어 1개 메모" }
+      ]
+    };
 
-    /* Application State */
+    // 상태 관리
     let currentDate = new Date();
-    let currentTargetModalPerson = 'son';
+    let currentMissions = JSON.parse(JSON.stringify(defaultMissions));
+    let dailyRecords = {}; // { 'YYYY-MM-DD': { checks: { s1: true, ... }, isRecovery: false } }
 
-    // Helper for formatting date YYYY-MM-DD
-    function formatDateKey(d) {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+    let modalContext = { mode: 'create', person: 'son', missionId: null };
+
+    function formatDate(d) {
+      return d.toISOString().split('T')[0];
     }
 
-    // Helper for display date
-    function getDisplayDateString(d) {
-      const today = new Date();
-      const isToday = formatDateKey(d) === formatDateKey(today);
-      const days = ['일', '월', '화', '수', '목', '금', '토'];
-      const dayName = days[d.getDay()];
-      const m = d.getMonth() + 1;
-      const dateNum = d.getDate();
-      return `${m}월 ${dateNum}일 (${dayName})${isToday ? ' · 오늘' : ''}`;
+    function getDateKey() {
+      return formatDate(currentDate);
     }
 
-    /* LocalStorage Get/Set with safety */
-    function getStoredData() {
-      try {
-        const raw = localStorage.getItem('one_team_board_data');
-        if (raw) return JSON.parse(raw);
-      } catch (e) {
-        console.error(e);
-      }
-      return {
-        customMissions: {
-          son: DEFAULT_SON_MISSIONS,
-          dad: DEFAULT_DAD_MISSIONS
-        },
-        dailyLogs: {} // { 'YYYY-MM-DD': { checked: { id: boolean }, sonComment: '', dadComment: '' } }
-      };
-    }
+    // =========================================================================
+    // 실시간 동기화 (Firestore Listeners)
+    // =========================================================================
+    function setupRealtimeListeners() {
+      const syncDot = document.getElementById('syncDot');
+      const syncStatus = document.getElementById('syncStatus');
 
-    function saveStoredData(data) {
-      try {
-        localStorage.setItem('one_team_board_data', JSON.stringify(data));
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    let appData = getStoredData();
-
-    // Ensure templates exist
-    if (!appData.customMissions) {
-      appData.customMissions = {
-        son: DEFAULT_SON_MISSIONS,
-        dad: DEFAULT_DAD_MISSIONS
-      };
-    }
-    if (!appData.dailyLogs) {
-      appData.dailyLogs = {};
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toastMessage');
-      toastMsg.innerText = msg;
-      toast.classList.remove('opacity-0', 'translate-y-3');
-      toast.classList.add('opacity-100', 'translate-y-0');
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-3');
-        toast.classList.remove('opacity-100', 'translate-y-0');
-      }, 2200);
-    }
-
-    function getDayLog(dateKey) {
-      if (!appData.dailyLogs[dateKey]) {
-        appData.dailyLogs[dateKey] = {
-          checked: {},
-          sonComment: '',
-          dadComment: ''
-        };
-      }
-      return appData.dailyLogs[dateKey];
-    }
-
-    function toggleMission(id) {
-      sound.playCheck();
-      const dateKey = formatDateKey(currentDate);
-      const dayLog = getDayLog(dateKey);
-      
-      const wasChecked = !!dayLog.checked[id];
-      dayLog.checked[id] = !wasChecked;
-      
-      saveStoredData(appData);
-      renderMissions();
-      updateDashboardStats();
-    }
-
-    function deleteMission(person, missionId) {
-      if (appData.customMissions[person].length <= 1) {
-        showToast('최소 1개 이상의 미션은 유지되어야 합니다.');
+      if (!isFirebaseReady) {
+        syncDot.className = "w-2 h-2 rounded-full bg-amber-500";
+        syncStatus.className = "text-[11px] font-medium text-amber-600";
+        syncStatus.textContent = "로컬 모드 (Firebase 키 입력 필요)";
+        loadLocalFallback();
+        renderAll();
         return;
       }
-      appData.customMissions[person] = appData.customMissions[person].filter(m => m.id !== missionId);
-      saveStoredData(appData);
+
+      // 1. 미션 목록 정의 실시간 수신
+      db.collection('team_settings').doc('missions').onSnapshot((doc) => {
+        if (doc.exists && doc.data().missions) {
+          currentMissions = doc.data().missions;
+        } else {
+          db.collection('team_settings').doc('missions').set({ missions: defaultMissions });
+        }
+        renderAll();
+      }, (err) => console.error("미션 동기화 실패:", err));
+
+      // 2. 전체 일일 체크 기록 실시간 수신
+      db.collection('team_daily_records').onSnapshot((querySnapshot) => {
+        dailyRecords = {};
+        querySnapshot.forEach((doc) => {
+          dailyRecords[doc.id] = doc.data();
+        });
+        syncDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+        syncStatus.className = "text-[11px] font-medium text-emerald-600";
+        syncStatus.textContent = "실시간 동기화 중";
+        renderAll();
+      }, (err) => {
+        console.error("일일 기록 동기화 실패:", err);
+      });
+    }
+
+    // 로컬 폴백 (Firebase 설정 전에도 사용 가능)
+    function loadLocalFallback() {
+      const savedMissions = localStorage.getItem('team_missions');
+      if (savedMissions) currentMissions = JSON.parse(savedMissions);
+      const savedRecords = localStorage.getItem('team_daily_records');
+      if (savedRecords) dailyRecords = JSON.parse(savedRecords);
+    }
+
+    function saveLocalFallback() {
+      localStorage.setItem('team_missions', JSON.stringify(currentMissions));
+      localStorage.setItem('team_daily_records', JSON.stringify(dailyRecords));
+    }
+
+    // =========================================================================
+    // 데이터 변경 및 Firebase 쓰기
+    // =========================================================================
+    async function toggleCheck(id) {
+      playTinkSound();
+      const dateKey = getDateKey();
+      if (!dailyRecords[dateKey]) {
+        dailyRecords[dateKey] = { checks: {}, isRecovery: false };
+      }
+      if (!dailyRecords[dateKey].checks) {
+        dailyRecords[dateKey].checks = {};
+      }
+
+      dailyRecords[dateKey].checks[id] = !dailyRecords[dateKey].checks[id];
+
+      // 로컬 즉시 반영
+      renderAll();
+
+      if (isFirebaseReady) {
+        await db.collection('team_daily_records').doc(dateKey).set(dailyRecords[dateKey], { merge: true });
+      } else {
+        saveLocalFallback();
+      }
+
+      checkCelebration();
+    }
+
+    async function toggleRecoveryMode() {
+      const dateKey = getDateKey();
+      if (!dailyRecords[dateKey]) dailyRecords[dateKey] = { checks: {}, isRecovery: false };
+      
+      const toggle = document.getElementById('recoveryToggle');
+      dailyRecords[dateKey].isRecovery = toggle.checked;
+
+      renderAll();
+
+      if (isFirebaseReady) {
+        await db.collection('team_daily_records').doc(dateKey).set(dailyRecords[dateKey], { merge: true });
+      } else {
+        saveLocalFallback();
+      }
+    }
+
+    async function updateMissionsInCloud() {
+      if (isFirebaseReady) {
+        await db.collection('team_settings').doc('missions').set({ missions: currentMissions });
+      } else {
+        saveLocalFallback();
+        renderAll();
+      }
+    }
+
+    // =========================================================================
+    // 화면 렌더링
+    // =========================================================================
+    function renderAll() {
+      renderDateHeader();
       renderMissions();
-      updateDashboardStats();
-      showToast('미션이 삭제되었습니다.');
+      renderProgressAndBadges();
+      renderWeeklyStreak();
+    }
+
+    function renderDateHeader() {
+      const d = currentDate;
+      const days = ['일', '월', '화', '수', '목', '금', '토'];
+      const isToday = formatDate(d) === formatDate(new Date());
+      const label = isToday ? `오늘 (${d.getMonth()+1}.${d.getDate()} ${days[d.getDay()]})` : `${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+      document.getElementById('dateDisplay').textContent = label;
+
+      const dateKey = getDateKey();
+      const isRecovery = dailyRecords[dateKey]?.isRecovery || false;
+      document.getElementById('recoveryToggle').checked = isRecovery;
     }
 
     function renderMissions() {
-      const dateKey = formatDateKey(currentDate);
-      const dayLog = getDayLog(dateKey);
+      const dateKey = getDateKey();
+      const currentDay = dailyRecords[dateKey] || { checks: {}, isRecovery: false };
+      const checks = currentDay.checks || {};
+      const isRecovery = currentDay.isRecovery;
 
-      // Render Son Missions
-      const sonContainer = document.getElementById('sonMissionsContainer');
-      sonContainer.innerHTML = '';
-      appData.customMissions.son.forEach(item => {
-        const isChecked = !!dayLog.checked[item.id];
-        const itemEl = document.createElement('div');
-        itemEl.className = `group flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
-          isChecked 
-            ? 'bg-emerald-950/30 border-emerald-500/50 text-white shadow-sm' 
-            : 'bg-slate-900/60 border-brand-border text-slate-300 hover:border-slate-600'
-        }`;
-        itemEl.onclick = (e) => {
-          if (e.target.closest('.delete-btn')) return;
-          toggleMission(item.id);
-        };
+      ['son', 'dad'].forEach(person => {
+        const listEl = document.getElementById(`${person}MissionList`);
+        listEl.innerHTML = '';
+        const missions = currentMissions[person] || [];
 
-        itemEl.innerHTML = `
-          <div class="flex items-center space-x-3 select-none flex-1">
-            <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs transition ${
-              isChecked 
-                ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/40 animate-check' 
-                : 'border border-slate-600 text-transparent group-hover:border-emerald-400'
-            }">
-              <i class="fa-solid fa-check"></i>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-emerald-400/80"><i class="${item.icon}"></i></span>
-              <div>
-                <p class="text-xs sm:text-sm font-bold ${isChecked ? 'line-through text-slate-400 font-medium' : 'text-slate-100'}">${item.title}</p>
-                <p class="text-[11px] text-slate-400">${item.detail}</p>
+        missions.forEach(m => {
+          const isChecked = !!checks[m.id];
+          const targetText = (isRecovery && m.recovery) ? m.recovery : m.target;
+          const checkClass = person === 'son' ? 'son-check' : '';
+
+          const item = document.createElement('div');
+          item.className = `group flex items-center justify-between p-3 rounded-2xl border transition-all ${
+            isChecked ? 'bg-slate-50/80 border-slate-200' : 'bg-white border-slate-100 hover:border-slate-200'
+          }`;
+
+          item.innerHTML = `
+            <div class="flex items-center space-x-3 flex-1 min-w-0 pr-2">
+              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck('${m.id}')" class="custom-check ${checkClass} flex-shrink-0">
+              <div class="truncate cursor-pointer" onclick="toggleCheck('${m.id}')">
+                <div class="text-sm font-bold ${isChecked ? 'line-through text-slate-400' : 'text-slate-800'} truncate">${m.title}</div>
+                <div class="text-xs font-semibold ${isChecked ? 'text-slate-400' : isRecovery ? 'text-amber-600 font-bold' : 'text-slate-400'} flex items-center gap-1">
+                  ${isRecovery ? '<i class="fa-solid fa-battery-half text-[10px]"></i>' : ''}
+                  ${targetText}
+                </div>
               </div>
             </div>
-          </div>
-          <button class="delete-btn opacity-0 group-hover:opacity-100 text-slate-600 hover:text-rose-400 p-1.5 transition text-xs" title="삭제" onclick="deleteMission('son', '${item.id}')">
-            <i class="fa-regular fa-trash-can"></i>
-          </button>
-        `;
-        sonContainer.appendChild(itemEl);
-      });
-
-      // Render Dad Missions
-      const dadContainer = document.getElementById('dadMissionsContainer');
-      dadContainer.innerHTML = '';
-      appData.customMissions.dad.forEach(item => {
-        const isChecked = !!dayLog.checked[item.id];
-        const itemEl = document.createElement('div');
-        itemEl.className = `group flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
-          isChecked 
-            ? 'bg-blue-950/30 border-blue-500/50 text-white shadow-sm' 
-            : 'bg-slate-900/60 border-brand-border text-slate-300 hover:border-slate-600'
-        }`;
-        itemEl.onclick = (e) => {
-          if (e.target.closest('.delete-btn')) return;
-          toggleMission(item.id);
-        };
-
-        itemEl.innerHTML = `
-          <div class="flex items-center space-x-3 select-none flex-1">
-            <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs transition ${
-              isChecked 
-                ? 'bg-blue-500 text-slate-950 font-bold shadow-md shadow-blue-500/40 animate-check' 
-                : 'border border-slate-600 text-transparent group-hover:border-blue-400'
-            }">
-              <i class="fa-solid fa-check"></i>
+            <div class="flex items-center space-x-1 opacity-60 group-hover:opacity-100 transition">
+              <button onclick="openEditModal('${person}', '${m.id}')" class="w-7 h-7 text-slate-400 hover:text-blue-600 flex items-center justify-center rounded-lg hover:bg-slate-100"><i class="fa-solid fa-pencil text-xs"></i></button>
+              <button onclick="deleteMission('${person}', '${m.id}')" class="w-7 h-7 text-slate-400 hover:text-red-500 flex items-center justify-center rounded-lg hover:bg-slate-100"><i class="fa-solid fa-trash-can text-xs"></i></button>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-blue-400/80"><i class="${item.icon}"></i></span>
-              <div>
-                <p class="text-xs sm:text-sm font-bold ${isChecked ? 'line-through text-slate-400 font-medium' : 'text-slate-100'}">${item.title}</p>
-                <p class="text-[11px] text-slate-400">${item.detail}</p>
-              </div>
-            </div>
-          </div>
-          <button class="delete-btn opacity-0 group-hover:opacity-100 text-slate-600 hover:text-rose-400 p-1.5 transition text-xs" title="삭제" onclick="deleteMission('dad', '${item.id}')">
-            <i class="fa-regular fa-trash-can"></i>
-          </button>
-        `;
-        dadContainer.appendChild(itemEl);
-      });
-
-      // Update comments input
-      document.getElementById('sonCommentInput').value = dayLog.sonComment || '';
-      document.getElementById('dadCommentInput').value = dayLog.dadComment || '';
-    }
-
-    let lastVictoryState = false;
-
-    function updateDashboardStats() {
-      const dateKey = formatDateKey(currentDate);
-      const dayLog = getDayLog(dateKey);
-
-      const sonMissions = appData.customMissions.son;
-      const dadMissions = appData.customMissions.dad;
-
-      const sonTotal = sonMissions.length;
-      const dadTotal = dadMissions.length;
-
-      const sonDone = sonMissions.filter(m => !!dayLog.checked[m.id]).length;
-      const dadDone = dadMissions.filter(m => !!dayLog.checked[m.id]).length;
-
-      const sonPercent = sonTotal ? Math.round((sonDone / sonTotal) * 100) : 0;
-      const dadPercent = dadTotal ? Math.round((dadDone / dadTotal) * 100) : 0;
-
-      // Son progress UI
-      document.getElementById('sonProgressLabel').innerText = `${sonDone} / ${sonTotal} 완료 (${sonPercent}%)`;
-      document.getElementById('sonBar').style.width = `${sonPercent}%`;
-
-      // Dad progress UI
-      document.getElementById('dadProgressLabel').innerText = `${dadDone} / ${dadTotal} 완료 (${dadPercent}%)`;
-      document.getElementById('dadBar').style.width = `${dadPercent}%`;
-
-      // Combined Team Progress
-      const totalCount = sonTotal + dadTotal;
-      const doneCount = sonDone + dadDone;
-      const totalPercent = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
-
-      document.getElementById('circlePercentText').innerText = `${totalPercent}%`;
-      document.getElementById('circleProgress').setAttribute('stroke-dasharray', `${totalPercent}, 100`);
-      document.getElementById('teamProgressBar').style.width = `${totalPercent}%`;
-      document.getElementById('teamScoreDetail').innerText = `완료 ${doneCount} / ${totalCount} 미션`;
-
-      const isVictory = totalPercent >= 75;
-      const badge = document.getElementById('victoryBadge');
-      const title = document.getElementById('bannerTitle');
-
-      if (isVictory) {
-        badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-950 border border-amber-300 shadow-lg shadow-amber-400/20";
-        badge.innerHTML = '<i class="fa-solid fa-star text-slate-950"></i> 오늘의 팀 승리 달성! ⭐️';
-        title.innerText = "오늘 원팀 미션 승리! 완벽한 하루 🏆";
-
-        // Celebrate on initial threshold break
-        if (!lastVictoryState) {
-          triggerConfetti();
-          sound.playWin();
-          lastVictoryState = true;
-        }
-      } else {
-        badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-600";
-        badge.innerHTML = '<i class="fa-solid fa-hourglass-half text-amber-400"></i> 목표 진행 중';
-        title.innerText = "오늘도 원팀으로 승리하자! 🔥";
-        lastVictoryState = false;
-      }
-
-      renderWeeklyTracker();
-    }
-
-    function triggerConfetti() {
-      try {
-        confetti({
-          particleCount: 70,
-          spread: 60,
-          origin: { y: 0.6 }
+          `;
+          listEl.appendChild(item);
         });
+      });
+    }
+
+    function renderProgressAndBadges() {
+      const dateKey = getDateKey();
+      const currentDay = dailyRecords[dateKey] || { checks: {} };
+      const checks = currentDay.checks || {};
+
+      let totalCount = 0;
+      let completedCount = 0;
+
+      ['son', 'dad'].forEach(person => {
+        const missions = currentMissions[person] || [];
+        const personTotal = missions.length;
+        const personCompleted = missions.filter(m => checks[m.id]).length;
+        document.getElementById(`${person}ProgressLabel`).textContent = `${personCompleted} / ${personTotal} 완료`;
+        totalCount += personTotal;
+        completedCount += personCompleted;
+      });
+
+      const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+      document.getElementById('teamProgressBar').style.width = `${percent}%`;
+      document.getElementById('teamPercent').textContent = `${percent}%`;
+
+      const badge = document.getElementById('winBadge');
+      if (percent >= 75) {
+        badge.className = "text-xs px-2.5 py-1 rounded-full bg-emerald-500 text-white font-black animate-bounce";
+        badge.textContent = "⭐️ 원팀 승리 달성!";
+      } else {
+        badge.className = "text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold";
+        badge.textContent = `승리까지 ${Math.max(0, Math.ceil(totalCount * 0.75) - completedCount)}개 남음`;
+      }
+    }
+
+    function renderWeeklyStreak() {
+      const container = document.getElementById('weeklyStreakContainer');
+      container.innerHTML = '';
+      const days = ['월', '화', '수', '목', '금', '토', '일'];
+
+      const temp = new Date(currentDate);
+      const day = temp.getDay();
+      const diff = temp.getDate() - day + (day === 0 ? -6 : 1); // 월요일 기준
+      const monday = new Date(temp.setDate(diff));
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const k = formatDate(d);
+
+        const rec = dailyRecords[k];
+        let won = false;
+        if (rec && rec.checks) {
+          const totalMissions = (currentMissions.son?.length || 0) + (currentMissions.dad?.length || 0);
+          const done = Object.values(rec.checks).filter(Boolean).length;
+          if (totalMissions > 0 && (done / totalMissions) >= 0.75) won = true;
+        }
+
+        const isCurrentSelected = k === getDateKey();
+        const el = document.createElement('div');
+        el.className = `flex flex-col items-center justify-center w-8 h-10 rounded-xl cursor-pointer transition ${
+          isCurrentSelected ? 'border-2 border-blue-500 bg-blue-50/40' : 'bg-slate-50'
+        }`;
+        el.onclick = () => { currentDate = d; renderAll(); };
+        el.innerHTML = `
+          <span class="text-[10px] font-bold text-slate-400">${days[i]}</span>
+          <span class="text-xs ${won ? 'text-amber-500 font-bold' : 'text-slate-300'}">${won ? '⭐️' : '•'}</span>
+        `;
+        container.appendChild(el);
+      }
+    }
+
+    // =========================================================================
+    // 미션 추가 및 모달 로직
+    // =========================================================================
+    function openMissionModal(person) {
+      modalContext = { mode: 'create', person, missionId: null };
+      document.getElementById('modalTitle').textContent = `${person === 'son' ? '의현이' : '아빠'} 새 미션 추가`;
+      document.getElementById('modalMissionTitle').value = '';
+      document.getElementById('modalMissionTarget').value = '';
+      document.getElementById('modalMissionRecovery').value = '';
+      document.getElementById('missionModal').classList.remove('hidden');
+    }
+
+    function openEditModal(person, missionId) {
+      modalContext = { mode: 'edit', person, missionId };
+      const m = currentMissions[person].find(item => item.id === missionId);
+      if (!m) return;
+      document.getElementById('modalTitle').textContent = `미션 수정`;
+      document.getElementById('modalMissionTitle').value = m.title;
+      document.getElementById('modalMissionTarget').value = m.target;
+      document.getElementById('modalMissionRecovery').value = m.recovery || '';
+      document.getElementById('missionModal').classList.remove('hidden');
+    }
+
+    function closeMissionModal() {
+      document.getElementById('missionModal').classList.add('hidden');
+    }
+
+    async function saveMission() {
+      const title = document.getElementById('modalMissionTitle').value.trim();
+      const target = document.getElementById('modalMissionTarget').value.trim();
+      const recovery = document.getElementById('modalMissionRecovery').value.trim();
+      if (!title || !target) return alert('미션 이름과 목표 기준을 입력해 주세요.');
+
+      const { mode, person, missionId } = modalContext;
+      if (mode === 'create') {
+        const newId = (person === 'son' ? 's_' : 'd_') + Date.now();
+        currentMissions[person].push({ id: newId, title, target, recovery });
+      } else {
+        const targetMission = currentMissions[person].find(item => item.id === missionId);
+        if (targetMission) {
+          targetMission.title = title;
+          targetMission.target = target;
+          targetMission.recovery = recovery;
+        }
+      }
+      closeMissionModal();
+      await updateMissionsInCloud();
+    }
+
+    async function deleteMission(person, missionId) {
+      if (!confirm('이 미션을 삭제할까요?')) return;
+      currentMissions[person] = currentMissions[person].filter(m => m.id !== missionId);
+      await updateMissionsInCloud();
+    }
+
+    // 날짜 네비게이션
+    function changeDate(days) {
+      currentDate.setDate(currentDate.getDate() + days);
+      renderAll();
+    }
+    function goToToday() {
+      currentDate = new Date();
+      renderAll();
+    }
+
+    // 효과음 및 축하 콘페티
+    let audioCtx = null;
+    function playTinkSound() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
       } catch (e) {}
     }
 
-    function getWeekDays(refDate) {
-      const curr = new Date(refDate);
-      const dayOfWeek = curr.getDay(); // 0 is Sun
-      // Normalize to Monday as first day
-      const diffToMonday = curr.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
-      const monday = new Date(curr.setDate(diffToMonday));
-      
-      const week = [];
-      for (let i = 0; i < 7; i++) {
-        const nextDay = new Date(monday);
-        nextDay.setDate(monday.getDate() + i);
-        week.push(nextDay);
+    function checkCelebration() {
+      const dateKey = getDateKey();
+      const currentDay = dailyRecords[dateKey] || { checks: {} };
+      const totalCount = (currentMissions.son?.length || 0) + (currentMissions.dad?.length || 0);
+      const completedCount = Object.values(currentDay.checks || {}).filter(Boolean).length;
+      if (totalCount > 0 && (completedCount / totalCount) >= 0.75) {
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
       }
-      return week;
     }
 
-    function renderWeeklyTracker() {
-      const weekDays = getWeekDays(currentDate);
-      const grid = document.getElementById('weeklyTrackerGrid');
-      grid.innerHTML = '';
-
-      let winsThisWeek = 0;
-      const dayNames = ['월', '화', '수', '목', '금', '토', '일'];
-
-      weekDays.forEach((day, index) => {
-        const dKey = formatDateKey(day);
-        const dayData = appData.dailyLogs[dKey] || { checked: {} };
-
-        const sonTotal = appData.customMissions.son.length;
-        const dadTotal = appData.customMissions.dad.length;
-        const total = sonTotal + dadTotal;
-
-        let completed = 0;
-        appData.customMissions.son.forEach(m => { if (dayData.checked[m.id]) completed++; });
-        appData.customMissions.dad.forEach(m => { if (dayData.checked[m.id]) completed++; });
-
-        const pct = total ? Math.round((completed / total) * 100) : 0;
-        const isWin = pct >= 75;
-        if (isWin) winsThisWeek++;
-
-        const isCurrentActiveDay = dKey === formatDateKey(currentDate);
-
-        const card = document.createElement('div');
-        card.className = `flex flex-col items-center justify-center p-2 rounded-xl border text-center transition cursor-pointer ${
-          isCurrentActiveDay 
-            ? 'border-emerald-400 bg-emerald-500/10' 
-            : 'border-slate-800 bg-slate-900/60 hover:border-slate-600'
-        }`;
-        card.onclick = () => {
-          currentDate = new Date(day);
-          updateDateDisplay();
-          renderMissions();
-          updateDashboardStats();
-        };
-
-        card.innerHTML = `
-          <span class="text-[10px] font-semibold ${isCurrentActiveDay ? 'text-emerald-400' : 'text-slate-400'}">${dayNames[index]}</span>
-          <span class="text-xs font-bold text-white mt-0.5">${day.getDate()}</span>
-          <div class="mt-1.5 flex items-center justify-center">
-            ${isWin 
-              ? '<span class="text-amber-400 text-xs">⭐️</span>' 
-              : completed > 0 
-                ? '<span class="text-[10px] text-slate-400 font-bold">' + pct + '%</span>'
-                : '<span class="text-[10px] text-slate-600">-</span>'
-            }
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-
-      document.getElementById('weeklyWinCount').innerText = `${winsThisWeek}/7일 승리`;
-
-      // Calculate streak
-      let streak = 0;
-      let checkD = new Date();
-      while (true) {
-        const k = formatDateKey(checkD);
-        const data = appData.dailyLogs[k];
-        if (!data) break;
-
-        const total = appData.customMissions.son.length + appData.customMissions.dad.length;
-        let c = 0;
-        appData.customMissions.son.forEach(m => { if (data.checked[m.id]) c++; });
-        appData.customMissions.dad.forEach(m => { if (data.checked[m.id]) c++; });
-        
-        if (total > 0 && Math.round((c / total) * 100) >= 75) {
-          streak++;
-          checkD.setDate(checkD.getDate() - 1);
-        } else {
-          break;
-        }
-      }
-      document.getElementById('streakNotice').innerText = `🔥 현재 ${streak}일 연속 원팀 승리 중!`;
-    }
-
-    function updateDateDisplay() {
-      document.getElementById('currentDateDisplay').innerText = getDisplayDateString(currentDate);
-    }
-
-    document.getElementById('prevDateBtn').onclick = () => {
-      currentDate.setDate(currentDate.getDate() - 1);
-      updateDateDisplay();
-      renderMissions();
-      updateDashboardStats();
+    // 초기 실행
+    window.onload = () => {
+      setupRealtimeListeners();
     };
-
-    document.getElementById('nextDateBtn').onclick = () => {
-      currentDate.setDate(currentDate.getDate() + 1);
-      updateDateDisplay();
-      renderMissions();
-      updateDashboardStats();
-    };
-
-    document.getElementById('todayBtn').onclick = () => {
-      currentDate = new Date();
-      updateDateDisplay();
-      renderMissions();
-      updateDashboardStats();
-    };
-
-    function saveComments() {
-      const dateKey = formatDateKey(currentDate);
-      const dayLog = getDayLog(dateKey);
-
-      dayLog.sonComment = document.getElementById('sonCommentInput').value.trim();
-      dayLog.dadComment = document.getElementById('dadCommentInput').value.trim();
-
-      saveStoredData(appData);
-      showToast('한줄평이 성공적으로 저장되었습니다!');
-    }
-
-    // Auto save on input change
-    document.getElementById('sonCommentInput').addEventListener('change', saveComments);
-    document.getElementById('dadCommentInput').addEventListener('change', saveComments);
-
-    /* Modal Handlers */
-    function openAddMissionModal(person) {
-      currentTargetModalPerson = person;
-      document.getElementById('modalTargetTitle').innerText = person === 'son' ? '⚽ 의현이 미션 추가' : '💼 아빠 미션 추가';
-      document.getElementById('newMissionTitle').value = '';
-      document.getElementById('newMissionDetail').value = '';
-      document.getElementById('addMissionModal').classList.remove('hidden');
-    }
-
-    function closeAddMissionModal() {
-      document.getElementById('addMissionModal').classList.add('hidden');
-    }
-
-    function confirmAddMission() {
-      const title = document.getElementById('newMissionTitle').value.trim();
-      const detail = document.getElementById('newMissionDetail').value.trim();
-      const icon = document.getElementById('newMissionIcon').value;
-
-      if (!title) {
-        showToast('미션 이름을 입력해주세요.');
-        return;
-      }
-
-      const newId = `${currentTargetModalPerson}_${Date.now()}`;
-      appData.customMissions[currentTargetModalPerson].push({
-        id: newId,
-        title,
-        detail: detail || '매일 꾸준히 실천하기',
-        icon
-      });
-
-      saveStoredData(appData);
-      closeAddMissionModal();
-      renderMissions();
-      updateDashboardStats();
-      showToast('새로운 미션이 등록되었습니다!');
-    }
-
-    function resetTodayData() {
-      const dateKey = formatDateKey(currentDate);
-      if (appData.dailyLogs[dateKey]) {
-        appData.dailyLogs[dateKey] = { checked: {}, sonComment: '', dadComment: '' };
-        saveStoredData(appData);
-        renderMissions();
-        updateDashboardStats();
-        showToast('오늘 기록이 초기화되었습니다.');
-      }
-    }
-
-    function exportWeeklyReport() {
-      const dateKey = formatDateKey(currentDate);
-      const dayLog = getDayLog(dateKey);
-
-      const sonMissions = appData.customMissions.son;
-      const dadMissions = appData.customMissions.dad;
-      const sonDone = sonMissions.filter(m => !!dayLog.checked[m.id]).length;
-      const dadDone = dadMissions.filter(m => !!dayLog.checked[m.id]).length;
-
-      const summaryText = `[부자 원팀 미션 상황판 (${dateKey})]\n` +
-        `⚽ 의현(U11): ${sonDone}/${sonMissions.length} 완료 - "${dayLog.sonComment || '오늘도 화이팅!'}"\n` +
-        `💼 아빠: ${dadDone}/${dadMissions.length} 완료 - "${dayLog.dadComment || '원팀 완주!'}"\n` +
-        `⭐️ 팀 합산 달성률: ${Math.round(((sonDone + dadDone) / (sonMissions.length + dadMissions.length)) * 100)}%`;
-
-      const tempTextArea = document.createElement('textarea');
-      tempTextArea.value = summaryText;
-      document.body.appendChild(tempTextArea);
-      tempTextArea.select();
-      try {
-        document.execCommand('copy');
-        showToast('클립보드에 상황판 요약이 복사되었습니다!');
-      } catch (err) {
-        showToast('복사에 실패했습니다.');
-      }
-      document.body.removeChild(tempTextArea);
-    }
-
-    // Initialize application on load
-    window.addEventListener('DOMContentLoaded', () => {
-      updateDateDisplay();
-      renderMissions();
-      updateDashboardStats();
-    });
   </script>
 </body>
 </html>
